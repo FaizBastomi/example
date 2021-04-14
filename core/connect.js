@@ -15,7 +15,6 @@ exports.connect = async () => {
     conn.browserDescription = Browsers.macOS('Chrome')
     
     conn.on('qr', async (qr) => {
-        qrcode.generate(qr, { small: true })
         console.log('\033[1;32mScan the QR code above.\x1b[0m')
     })
     fs.existsSync('./Midnight.json') && conn.loadAuthInfo('./Midnight.json')
