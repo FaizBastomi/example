@@ -48,6 +48,8 @@ ev.on('chat-update', async (msg) => {
         const isQImg = type === 'extendedTextMessage' && content.includes('imageMessage')
         const isQVid = type === 'extendedTextMessage' && content.includes('videoMessage')
 
+        printLog(isCmd, jid, groupSubject, isGroup)
+
         switch (command) {
             case 'help':
                 wa.custom(from, `Hello, ${pushname} ( @${jid.split('@')[0]} )\nSaya disini bisa membantu mu untuk membuat stiker whatsapp :D\nSilahkan ketik !stiker`, MessageType.extendedText, { contextInfo: {"mentionedJid": [jid] }, quoted: msg })
