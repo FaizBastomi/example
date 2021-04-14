@@ -21,12 +21,22 @@ exports.serialize = function(chat) {
 
     try {
         const quote = m.message.extendedTextMessage.contextInfo
-        json = {
-            id: quote.stanzaId ? quote.stanzaId : '',
-            sender: quote.participant ? quote.participant : '',
-            message: quote.quotedMessage ? quote.quotedMessage : ''
+        if (quote.quotedMessage === null || quote.quotedMessage === undefined) {
+            m.quoted = null;
+        } else {
+            let tempM = {
+                id: '',
+                sender: '',
+                message: ''
+            }
+            let newM = {
+                id: quote.stanzaId,
+                sender: quote.participant,
+                message: quote.quotedMessage
+            }
+            Object.assign(tempM, newM)
+            m.quoted = tempM
         }
-        m.quoted = json
     } catch {
         m.quoted = null
     }
@@ -61,7 +71,8 @@ exports.serialize = function(chat) {
     m.body = txt
 
     if (m.isEphemeral) {
-        content2 = m.message.ephemeralMessage.message
+        m.message = m.message.ephemeralMessage.message
+        content2 = m.message
         const tip2 = Object.keys(content2)[0]
         const text = (tip2 === 'extendedTextMessage' && content2.extendedTextMessage.text) ? content2.extendedTextMessage.text 
         : (tip2 == 'imageMessage') && content2.imageMessage.caption ? content2.imageMessage.caption 
@@ -69,20 +80,30 @@ exports.serialize = function(chat) {
         m.body = text
 
         try {
-            const mens = content2[tip2].contextInfo.mentionedJid
+            const mens = m.message[tip2].contextInfo.mentionedJid
             m.mentionedJid = mens
         } catch {
             m.mentionedJid = null
         }
 
         try {
-            const quote = content2[tip2].contextInfo
-            json = {
-                id: quote.stanzaId ? quote.stanzaId : '',
-                sender: quote.participant ? quote.participant : '',
-                message: quote.quotedMessage ? quote.quotedMessage : ''
+            const quote = m.message.extendedTextMessage.contextInfo
+            if (quote.quotedMessage === null || quote.quotedMessage === undefined) {
+                m.quoted = null;
+            } else {
+                let tempM = {
+                    id: '',
+                    sender: '',
+                    message: ''
+                }
+                let newM = {
+                    id: quote.stanzaId,
+                    sender: quote.participant,
+                    message: quote.quotedMessage
+                }
+                Object.assign(tempM, newM)
+                m.quoted = tempM
             }
-            m.quoted = json
         } catch {
             m.quoted = null
         }

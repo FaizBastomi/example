@@ -7,3 +7,6 @@ node_modules/
 # Lock files
 *-lock.json
 *.lock
+
+# Testing file
+tes.js
