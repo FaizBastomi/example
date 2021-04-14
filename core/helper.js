@@ -49,13 +49,33 @@ exports.serialize = function(chat) {
     }
 
     if(m.isGroup) {
-        m.sender = m.participant
+        if (m.participant === wa.user.jid) {
+            let tempS = {
+                jid: wa.user.jid,
+                name: wa.user.name
+            }
+            m.sender = tempS
+        }
+        let contact = wa.contacts[m.participant]
+        m.sender = contact
     } else {
-        m.sender = m.key.remoteJid
+        if (m.key.remoteJid === wa.user.jid) {
+            let tempS = {
+                jid: wa.user.jid,
+                name: wa.user.name
+            }
+            m.sender = tempS
+        }
+        let contact = wa.contacts[m.key.remoteJid]
+        m.sender = contact
     }
 
     if (m.key.fromMe) {
-        m.sender = wa.user.jid
+        let tempS = {
+            jid: wa.user.jid,
+            name: wa.user.name || wa.user.vname || wa.user.verify
+        }
+        m.sender = tempS
     }
 
     if (m.type == 'ephemeralMessage') {
@@ -94,12 +114,14 @@ exports.serialize = function(chat) {
                 let tempM = {
                     id: '',
                     sender: '',
-                    message: ''
+                    ephemeralMessage: ''
                 }
                 let newM = {
                     id: quote.stanzaId,
                     sender: quote.participant,
-                    message: quote.quotedMessage
+                    ephemeralMessage: {
+                        message: quote.quotedMessage
+                    }
                 }
                 Object.assign(tempM, newM)
                 m.quoted = tempM
@@ -121,4 +143,20 @@ exports.sendText = function(jid, text) {
 
 exports.custom = function(jid, text, Messagetype, options={}) {
     wa.sendMessage(jid, text, Messagetype, options)
+}
+
+exports.image = function(jid, data, options={}) {
+    if (typeof data === 'string') {
+        wa.sendMessage(jid, fs.readFileSync(data), MessageType.image, options)
+    } else {
+        wa.sendMessage(jid, data, MessageType.image, options)
+    }
+}
+
+exports.sticker = function(jid, data, options={}) {
+    if (typeof data === 'string') {
+        wa.sendMessage(jid, fs.readFileSync(data), MessageType.sticker, options)
+    } else {
+        wa.sendMessage(jid, data, MessageType.sticker, options)
+    }
 }
