@@ -13,11 +13,13 @@ git clone https://github.com/FaizBastomi/example.git
 cd example
 ```
 <br />
+
 2. Install dependencies<br />
 ```sh
 npm install
 ```
 <br />
+
 3. Run Bot<br />
 ```sh
 npm start
