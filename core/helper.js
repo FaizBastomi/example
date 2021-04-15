@@ -108,24 +108,18 @@ exports.serialize = function(chat) {
 
         try {
             const quote = m.message.extendedTextMessage.contextInfo
-            if (quote.quotedMessage === null || quote.quotedMessage === undefined) {
-                m.quoted = null;
-            } else {
-                let tempM = {
-                    id: '',
-                    sender: '',
-                    ephemeralMessage: ''
-                }
-                let newM = {
-                    id: quote.stanzaId,
-                    sender: quote.participant,
-                    ephemeralMessage: {
-                        message: quote.quotedMessage
-                    }
-                }
-                Object.assign(tempM, newM)
-                m.quoted = tempM
+            let tempS = {
+                stanzaId: '',
+                participant: '',
+                message: ''
             }
+            let sNew = {
+                stanzaId: quote.stanzaId,
+                participant: quote.participant,
+                message : quote.quotedMessage
+            }
+            Object.assign(tempS, sNew)
+            m.quoted = tempS
         } catch {
             m.quoted = null
         }
