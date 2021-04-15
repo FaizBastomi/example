@@ -10,6 +10,7 @@ const {
 const ffmpeg = require('fluent-ffmpeg')
 const fs = require('fs')
 const moment = require('moment-timezone')
+const { exec } = require('child_process')
 
 const ev = con.Whatsapp
 const prefix = '!'
@@ -147,6 +148,25 @@ ev.on('chat-update', async (msg) => {
                             wa.reply(from, 'kirim gambar atau video kepada saya dengan caption *!stiker*.\nMaksimal durasi video 15detik', msg)
                         }
                         break
+            case 'toimg':
+                if (isQStick || msg.quoted.message.stickerMessage.isAnimated === false) {
+                    const ran = getRandom('.webp')
+                    const ran1 = getRandom('.png')
+                    const encmed = quoted
+                    const media = await ev.downloadAndSaveMediaMessage(encmed, `./temp${ran}`)
+                    exec(`ffmpeg -i ${media} ./temp/${ran1}`, function(err) {
+                        fs.unlinkSync(media)
+                        if (err) return wa.reply(from, 'Ada yang eror', msg)
+                        wa.image(from, `./temp/${ran1}`, { quoted: msg, caption: 'Done.' })
+                        fs.unlinkSync(`./temp/${ran1}`)
+                    })
+                } else {
+                    wa.reply(from, 'Silahkan reply stickernya.\nHanya dapat decrypt non-animated sticker.', msg)
+                }
+                break
+
+                default:
+                    break
         }
     } catch(e) {
         console.log(`Error: ${e}`)

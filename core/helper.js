@@ -145,6 +145,12 @@ exports.custom = function(jid, text, Messagetype, options={}) {
     wa.sendMessage(jid, text, Messagetype, options)
 }
 
+/**
+ * 
+ * @param {jid} jid of the chat
+ * @param {data} data Buffer or path to file
+ * @param {options} options baileys Message Options
+ */
 exports.image = function(jid, data, options={}) {
     if (typeof data === 'string') {
         wa.sendMessage(jid, fs.readFileSync(data), MessageType.image, options)
@@ -153,6 +159,12 @@ exports.image = function(jid, data, options={}) {
     }
 }
 
+/**
+ * 
+ * @param {jid} jid of the chat
+ * @param {data} data Buffer or path to file
+ * @param {options} options baileys Message Options
+ */
 exports.sticker = function(jid, data, options={}) {
     if (typeof data === 'string') {
         wa.sendMessage(jid, fs.readFileSync(data), MessageType.sticker, options)
