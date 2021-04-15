@@ -149,7 +149,7 @@ ev.on('chat-update', async (msg) => {
                         }
                         break
             case 'toimg':
-                if (isQStick || msg.quoted.message.stickerMessage.isAnimated === false) {
+                if (isQStick && msg.quoted.message.stickerMessage.isAnimated === false) {
                     const ran = getRandom('.webp')
                     const ran1 = getRandom('.png')
                     const encmed = quoted
