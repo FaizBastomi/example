@@ -29,11 +29,9 @@ ev.on('chat-update', async (msg) => {
         msg = wa.serialize(msg)
         if (!msg.message) return;
         if (msg.key && msg.key.remoteJid === 'status@broadcast') return;
-        // if (!msg.key.fromMe) return;
+        if (!msg.key.fromMe) return;
         const { from, sender, isGroup, isEphemeral, quoted, mentionedJid, type } = msg
         let { body } = msg
-        let { name, vname, notify, verify , jid } = sender
-        pushname = name || vname || notify || verify
         body = (type === 'conversation' && body.startsWith(prefix)) ? body : (((type === 'imageMessage' || type === 'videoMessage') && body) && body.startsWith(prefix)) ? body : ((type === 'ephemeralMessage') && body.startsWith(prefix)) ? body : ((type === 'extendedTextMessage') && body.startsWith(prefix)) ? body : ''
         const command = body.slice(1).trim().split(/ +/).shift().toLowerCase()
         const arg = body.substring(body.indexOf(' ') + 1)
@@ -49,57 +47,20 @@ ev.on('chat-update', async (msg) => {
         const isQImg = type === 'extendedTextMessage' && content.includes('imageMessage')
         const isQVid = type === 'extendedTextMessage' && content.includes('videoMessage')
 
-        printLog(isCmd, jid, groupSubject, isGroup)
+        const QStickEph = type === 'ephemeralMessage' && content.includes('stickerMessage')
+        const QImgEph = type === 'ephemeralMessage' && content.includes('imageMessage')
+        const QVidEph = type === 'ephemeralMessage' && content.includes('videoMessage')
+
+        printLog(isCmd, sender, groupSubject, isGroup)
 
         switch (command) {
             case 'help':
-                wa.custom(from, `Hello, ${pushname} ( @${jid.split('@')[0]} )\nSaya disini bisa membantu mu untuk membuat stiker whatsapp :D\nSilahkan ketik !stiker`, MessageType.extendedText, { contextInfo: {"mentionedJid": [jid] }, quoted: msg })
+                wa.custom(from, `Hello, ( @${sender.split('@')[0]} )\nSaya disini bisa membantu mu untuk membuat stiker whatsapp :D\nSilahkan ketik !stiker`, MessageType.extendedText, { contextInfo: {"mentionedJid": [sender] }, quoted: msg })
                 break
-            // case 'ev':{
-            //     let code = args.join(' ')
-            //     try {
-            //         let evaled;
-            //         if (!code) return wa.reply(from, 'No Javascript code', msg)
-
-            //         if (code.includes('--async') && code.includes('--silent')) {
-            //             code = code.replace('--async','').replace('--silent','')
-
-            //             return await eval(`(async () => { ${code} })()`)
-            //         } else if (code.includes('--async')) {
-            //             code = code.replace('--async','')
-
-            //             evaled = await eval(`(async () => { ${code} })()`)
-            //         } else if (code.includes('--silent')) {
-            //             code = code.replace('--silent','')
-
-            //             return await eval(code)
-            //         } else evaled = await eval(code)
-
-            //         if (typeof evaled !== 'string')
-            //         evaled = require('util').format(evaled)
-
-            //         let output = clean(evaled)
-            //         wa.reply(from, output, msg)
-            //     } catch(e) {
-            //         let outerr = clean(e)
-
-            //         wa.reply(from, `Err: ${outerr}`, msg)
-            //     }
-
-            //     function clean(code) {
-            //         if (typeof code === 'string')
-            //         return code
-            //         .replace(/`/g, `\`${String.fromCharCode(8203)}`)
-            //         .replace(/@/g, `@${String.fromCharCode(8203)}`)
-
-            //         else return code
-            //     }
-            //     break
-            // }
             case 'sticker':
                 case 'stiker':
                     case 'stik':
-                        if (isMedia && !msg.message.videoMessage || isQImg) {
+                        if (isMedia && !msg.message.videoMessage || isEphemeral && !msg.message.videoMessage || isQImg || QImgEph) {
                             const encmed = isQImg ? quoted : msg
                             const rand = getRandom('.jpeg')
                             const rand1 = getRandom('.webp')
@@ -121,7 +82,7 @@ ev.on('chat-update', async (msg) => {
                             .addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
                             .toFormat('webp')
                             .save(`./temp/${rand1}`)
-                        } else if (isMedia && msg.message.videoMessage.seconds <= 15 || isQVid && msg.quoted.message.videoMessage.seconds <= 15) {
+                        } else if (isMedia && msg.message.videoMessage.seconds <= 15 || isEphemeral && !msg.message.videoMessage.seconds <= 15 || isQVid && quoted.message.videoMessage.seconds <= 15 || QVidEph && quoted.message.videoMessage.seconds <= 15) {
                             const encmed = isQVid ? quoted : msg
                             const ran1 = getRandom('.mp4')
                             const ran = getRandom('.webp')
@@ -149,7 +110,7 @@ ev.on('chat-update', async (msg) => {
                         }
                         break
             case 'toimg':
-                if (isQStick && msg.quoted.message.stickerMessage.isAnimated === false) {
+                if (isQStick && msg.quoted.message.stickerMessage.isAnimated === false || QStickEph && msg.quoted.message.stickerMessage.isAnimated === false) {
                     const ran = getRandom('.webp')
                     const ran1 = getRandom('.png')
                     const encmed = quoted

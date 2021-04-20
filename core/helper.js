@@ -49,33 +49,13 @@ exports.serialize = function(chat) {
     }
 
     if(m.isGroup) {
-        if (m.participant === wa.user.jid) {
-            let tempS = {
-                jid: wa.user.jid,
-                name: wa.user.name
-            }
-            m.sender = tempS
-        }
-        let contact = wa.contacts[m.participant]
-        m.sender = contact
+        m.sender = m.participant
     } else {
-        if (m.key.remoteJid === wa.user.jid) {
-            let tempS = {
-                jid: wa.user.jid,
-                name: wa.user.name
-            }
-            m.sender = tempS
-        }
-        let contact = wa.contacts[m.key.remoteJid]
-        m.sender = contact
+        m.sender = m.key.remoteJid
     }
 
     if (m.key.fromMe) {
-        let tempS = {
-            jid: wa.user.jid,
-            name: wa.user.name || wa.user.vname || wa.user.verify
-        }
-        m.sender = tempS
+        m.sender = wa.user.jid
     }
 
     if (m.type == 'ephemeralMessage') {
