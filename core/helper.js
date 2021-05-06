@@ -9,9 +9,18 @@ const wa = con.Whatsapp
 
 exports.serialize = function(chat) {
     m = JSON.parse(JSON.stringify(chat)).messages[0]
+
+    if(m.message['ephemeralMessage']) {
+        m.message = m.message.ephemeralMessage.message
+        m.isEphemeral = true
+    } else {
+        m.isEphemeral = false
+    }
+
     content = m.message
     m.isGroup = m.key.remoteJid.endsWith('@g.us')
     m.from = m.key.remoteJid
+
     try{
         const tipe = Object.keys(content)[0]
         m.type = tipe
@@ -19,25 +28,14 @@ exports.serialize = function(chat) {
         m.type = null
     }
 
-    try {
+    try{
         const quote = m.message.extendedTextMessage.contextInfo
-        if (quote.quotedMessage === null || quote.quotedMessage === undefined) {
-            m.quoted = null;
+        if (quote.quotedMessage['ephemeralMessage']) {
+            m.quoted = { stanzaId: quote.stanzaId, participant: quote.participant, message: quote.quotedMessage.ephemeralMessage.message }
         } else {
-            let tempM = {
-                id: '',
-                sender: '',
-                message: ''
-            }
-            let newM = {
-                id: quote.stanzaId,
-                sender: quote.participant,
-                message: quote.quotedMessage
-            }
-            Object.assign(tempM, newM)
-            m.quoted = tempM
+            m.quoted = { stanzaId: quote.stanzaId, participant: quote.participant, message: quote.quotedMessage }
         }
-    } catch {
+    }catch{
         m.quoted = null
     }
 
@@ -58,52 +56,12 @@ exports.serialize = function(chat) {
         m.sender = wa.user.jid
     }
 
-    if (m.type == 'ephemeralMessage') {
-        m.isEphemeral = true
-    } else {
-        m.isEphemeral = false
-    }
-
     const txt = (m.type === 'conversation' && m.message.conversation) ? m.message.conversation 
     : (m.type == 'imageMessage') && m.message.imageMessage.caption ? m.message.imageMessage.caption 
     : (m.type == 'videoMessage') && m.message.videoMessage.caption ? m.message.videoMessage.caption 
     : (m.type == 'extendedTextMessage') && m.message.extendedTextMessage.text ? m.message.extendedTextMessage.text : ''
     m.body = txt
 
-    if (m.isEphemeral) {
-        m.message = m.message.ephemeralMessage.message
-        content2 = m.message
-        const tip2 = Object.keys(content2)[0]
-        const text = (tip2 === 'extendedTextMessage' && content2.extendedTextMessage.text) ? content2.extendedTextMessage.text 
-        : (tip2 == 'imageMessage') && content2.imageMessage.caption ? content2.imageMessage.caption 
-        : (tip2 == 'videoMessage') && content2.videoMessage.caption ? content2.videoMessage.caption : ''
-        m.body = text
-
-        try {
-            const mens = m.message[tip2].contextInfo.mentionedJid
-            m.mentionedJid = mens
-        } catch {
-            m.mentionedJid = null
-        }
-
-        try {
-            const quote = m.message.extendedTextMessage.contextInfo
-            let tempS = {
-                stanzaId: '',
-                participant: '',
-                message: ''
-            }
-            let sNew = {
-                stanzaId: quote.stanzaId,
-                participant: quote.participant,
-                message : quote.quotedMessage
-            }
-            Object.assign(tempS, sNew)
-            m.quoted = tempS
-        } catch {
-            m.quoted = null
-        }
-    }
     return m
 }
 
