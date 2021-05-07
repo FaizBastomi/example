@@ -12,10 +12,25 @@ const wa = con.Whatsapp
  * @param chat Chat
  * @returns
  */
-exports.serialize = function(chat) {
+ exports.serialize = function(chat) {
     m = JSON.parse(JSON.stringify(chat)).messages[0]
 
+    try {
+        if (m.message['ephemeralMessage']) {
+            m.message = m.message.ephemeralMessage.message
+            m.isEphemeral = true
+        } else {
+            m.isEphemeral = false
+        }
+    } catch(err) {
+        console.log(err)
+        throw err
+    }
+    
     const content = m.message
+    m.isGroup = m.key.remoteJid.endsWith('@g.us')
+    m.from = m.key.remoteJid
+
     try{
         const tipe = Object.keys(content)[0]
         m.type = tipe
@@ -23,24 +38,14 @@ exports.serialize = function(chat) {
         m.type = null
     }
 
-    if(m.type === 'ephemeralMessage') {
-        m.message = m.message.ephemeralMessage.message
-        m.isEphemeral = true
-    } else {
-        m.isEphemeral = false
-    }
-
-    m.isGroup = m.key.remoteJid.endsWith('@g.us')
-    m.from = m.key.remoteJid
-
-    try{
+    try {
         const quote = m.message.extendedTextMessage.contextInfo
-        if (quote.quotedMessage['ephemeralMessage']) {
+        if (quote.quotedMessage["ephemeralMessage"]) {
             m.quoted = { stanzaId: quote.stanzaId, participant: quote.participant, message: quote.quotedMessage.ephemeralMessage.message }
         } else {
             m.quoted = { stanzaId: quote.stanzaId, participant: quote.participant, message: quote.quotedMessage }
         }
-    }catch{
+    } catch {
         m.quoted = null
     }
 
