@@ -9,34 +9,37 @@ const wa = con.Whatsapp
 
 /**
  * Serialize
- * @param chat Chat
- * @returns
+ * @param chat message
+ * @returns message
  */
  exports.serialize = function(chat) {
     m = JSON.parse(JSON.stringify(chat)).messages[0]
+    const content = m.message
 
     try {
-        if (m.message['ephemeralMessage']) {
-            m.message = m.message.ephemeralMessage.message
-            m.isEphemeral = true
-        } else {
-            m.isEphemeral = false
-        }
-    } catch(err) {
-        console.log(err)
-        throw err
-    }
-    
-    const content = m.message
-    m.isGroup = m.key.remoteJid.endsWith('@g.us')
-    m.from = m.key.remoteJid
-
-    try{
         const tipe = Object.keys(content)[0]
         m.type = tipe
     } catch {
         m.type = null
     }
+
+    if (m.type === 'ephemeralMessage') {
+        m.message = m.message.ephemeralMessage.message
+
+        try {
+            const tipe = Object.keys(m.message)[0]
+            m.type = tipe
+        } catch {
+            m.type = null
+        }
+
+        m.isEphemeral = true
+    } else {
+        m.isEphemeral = false
+    }
+
+    m.isGroup = m.key.remoteJid.endsWith('@g.us')
+    m.from = m.key.remoteJid
 
     try {
         const quote = m.message.extendedTextMessage.contextInfo
