@@ -3,7 +3,6 @@ const {
     Browsers
 } = require('@adiwajshing/baileys')
 const fs = require('fs')
-const qrcode = require('qrcode-terminal')
 
 const conn = new WAConnection()
 
@@ -14,7 +13,7 @@ exports.connect = async () => {
     // Custom browser
     conn.browserDescription = Browsers.macOS('Chrome')
     
-    conn.on('qr', async (qr) => {
+    conn.on('qr', () => {
         console.log('\033[1;32mScan the QR code above.\x1b[0m')
     })
     fs.existsSync('./Midnight.json') && conn.loadAuthInfo('./Midnight.json')

@@ -30,9 +30,9 @@ ev.on('chat-update', async (msg) => {
         if (!msg.message) return;
         if (msg.key && msg.key.remoteJid === 'status@broadcast') return;
         if (!msg.key.fromMe) return;
-        const { from, sender, isGroup, isEphemeral, quoted, mentionedJid, type } = msg
+        const { from, sender, isGroup, quoted, type } = msg
         let { body } = msg
-        body = (type === 'conversation' && body.startsWith(prefix)) ? body : (((type === 'imageMessage' || type === 'videoMessage') && body) && body.startsWith(prefix)) ? body : ((type === 'ephemeralMessage') && body.startsWith(prefix)) ? body : ((type === 'extendedTextMessage') && body.startsWith(prefix)) ? body : ''
+        body = (type === 'conversation' && body.startsWith(prefix)) ? body : (((type === 'imageMessage' || type === 'videoMessage') && body) && body.startsWith(prefix)) ? body : ((type === 'extendedTextMessage') && body.startsWith(prefix)) ? body : ''
         const command = body.slice(1).trim().split(/ +/).shift().toLowerCase()
         const arg = body.substring(body.indexOf(' ') + 1)
         const args = body.trim().split(/ +/).slice(1)
@@ -41,15 +41,11 @@ ev.on('chat-update', async (msg) => {
         const groupMetadata = isGroup ? await ev.groupMetadata(from) : ''
         const groupSubject = isGroup ? groupMetadata.subject : ''
 
-        const content = JSON.stringify(msg.quoted)
+        const content = JSON.stringify(quoted)
         const isMedia = (type === 'imageMessage' || type === 'videoMessage')
         const isQStick = type === 'extendedTextMessage' && content.includes('stickerMessage')
         const isQImg = type === 'extendedTextMessage' && content.includes('imageMessage')
         const isQVid = type === 'extendedTextMessage' && content.includes('videoMessage')
-
-        const QStickEph = type === 'ephemeralMessage' && content.includes('stickerMessage')
-        const QImgEph = type === 'ephemeralMessage' && content.includes('imageMessage')
-        const QVidEph = type === 'ephemeralMessage' && content.includes('videoMessage')
 
         printLog(isCmd, sender, groupSubject, isGroup)
 
@@ -60,7 +56,7 @@ ev.on('chat-update', async (msg) => {
             case 'sticker':
                 case 'stiker':
                     case 'stik':
-                        if (isMedia && !msg.message.videoMessage || isEphemeral && !msg.message.videoMessage || isQImg || QImgEph) {
+                        if (isMedia && !msg.message.videoMessage || isQImg) {
                             const encmed = isQImg ? quoted : msg
                             const rand = getRandom('.jpeg')
                             const rand1 = getRandom('.webp')
@@ -82,7 +78,7 @@ ev.on('chat-update', async (msg) => {
                             .addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
                             .toFormat('webp')
                             .save(`./temp/${rand1}`)
-                        } else if (isMedia && msg.message.videoMessage.seconds <= 15 || isEphemeral && !msg.message.videoMessage.seconds <= 15 || isQVid && quoted.message.videoMessage.seconds <= 15 || QVidEph && quoted.message.videoMessage.seconds <= 15) {
+                        } else if (isMedia && msg.message.videoMessage.seconds <= 15 || isQVid && quoted.message.videoMessage.seconds <= 15) {
                             const encmed = isQVid ? quoted : msg
                             const ran1 = getRandom('.mp4')
                             const ran = getRandom('.webp')
@@ -110,7 +106,7 @@ ev.on('chat-update', async (msg) => {
                         }
                         break
             case 'toimg':
-                if (isQStick && msg.quoted.message.stickerMessage.isAnimated === false || QStickEph && msg.quoted.message.stickerMessage.isAnimated === false) {
+                if (isQStick && msg.quoted.message.stickerMessage.isAnimated === false) {
                     const ran = getRandom('.webp')
                     const ran1 = getRandom('.png')
                     const encmed = quoted

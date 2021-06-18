@@ -70,9 +70,9 @@ const wa = con.Whatsapp
     }
 
     const txt = (m.type === 'conversation' && m.message.conversation) ? m.message.conversation 
-    : (m.type == 'imageMessage') && m.message.imageMessage.caption ? m.message.imageMessage.caption 
-    : (m.type == 'videoMessage') && m.message.videoMessage.caption ? m.message.videoMessage.caption 
-    : (m.type == 'extendedTextMessage') && m.message.extendedTextMessage.text ? m.message.extendedTextMessage.text : ''
+    : (m.type == 'imageMessage') && m.message[m.type].caption ? m.message[m.type].caption 
+    : (m.type == 'videoMessage') && m.message[m.type].caption ? m.message[m.type].caption 
+    : (m.type == 'extendedTextMessage') && m.message[m.type].text ? m.message[m.type].text : ''
     m.body = txt
 
     return m

@@ -1,6 +1,6 @@
 {
-  "name": "new-selfbot",
-  "version": "1.0.0",
+  "name": "example",
+  "version": "0.0.1",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -8,13 +8,12 @@
     "start": "node main.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "FaizBastomi",
+  "license": "MIT",
   "dependencies": {
     "@adiwajshing/baileys": "github:adiwajshing/baileys",
     "chalk": "*",
     "fluent-ffmpeg": "*",
-    "moment-timezone": "*",
-    "qrcode-terminal": "*"
+    "moment-timezone": "*"
   }
 }
