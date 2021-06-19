@@ -29,7 +29,7 @@ ev.on('chat-update', async (msg) => {
         msg = wa.serialize(msg)
         if (!msg.message) return;
         if (msg.key && msg.key.remoteJid === 'status@broadcast') return;
-        if (!msg.key.fromMe) return;
+        if (msg.key.fromMe) return;
         const { from, sender, isGroup, quoted, type } = msg
         let { body } = msg
         body = (type === 'conversation' && body.startsWith(prefix)) ? body : (((type === 'imageMessage' || type === 'videoMessage') && body) && body.startsWith(prefix)) ? body : ((type === 'extendedTextMessage') && body.startsWith(prefix)) ? body : ''
